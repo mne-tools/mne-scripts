@@ -74,6 +74,10 @@ mne_do_forward_solution --mindist 5 --spacing oct-6 \
         --meas sample_audvis_raw.fif --bem sample-5120-5120-5120 \
         --fwd sample_audvis-meg-eeg-oct-6-fwd.fif
 
+# Look at SSPs sensitivity maps
+mne_sensitivity_map --fwd sample_audvis-meg-oct-6-fwd.fif --map 1 \
+        --w sample_audvis-meg-oct-6-fwd-sensmap
+
 # Generate transformation matrices
 mne_collect_transforms --meas ${MEG_DIR}/sample_audvis_raw.fif \
     --mri ${MEG_DIR}/sample_audvis_raw-trans.fif --out ${MEG_DIR}/all-trans.fif
