@@ -96,6 +96,10 @@ mne_do_inverse_operator --fwd sample_audvis-eeg-oct-6-fwd.fif \
 mne_do_inverse_operator --fwd sample_audvis-meg-eeg-oct-6-fwd.fif \
         --depth --loose 0.2 --eeg --meg
 
+# produce one with fixed orientation (for testing)
+mne_do_inverse_operator --fwd sample_audvis-meg-oct-6-fwd.fif \
+        --depth --meg --fixed
+
 # Produce stc files
 
 mods="meg eeg meg-eeg"
