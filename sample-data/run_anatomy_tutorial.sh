@@ -29,6 +29,7 @@ ln -s flash/outer_skull.surf .
 # Make high resolution head surface
 mkheadsurf -s ${SUBJECT}
 mne_surf2bem --surf ${SUBJECTS_DIR}/${SUBJECT}/surf/lh.seghead --id 4 --check --fif ${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-head.fif
+# if the previous command fails you can use the --force option.
 
 # Generate morph maps for morphing between sample and fsaverage
 mne_make_morph_maps --from ${SUBJECT} --to fsaverage
