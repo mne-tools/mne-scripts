@@ -23,6 +23,12 @@ ln -s flash/inner_skull.surf .
 ln -s flash/outer_skin.surf .
 ln -s flash/outer_skull.surf .
 
+# without FLASH images you should use
+# mne_watershed_bem
+# ln -s watershed/${SUBJECT}_inner_skull_surface ${SUBJECT}-inner_skull.surf
+# ln -s watershed/${SUBJECT}_outer_skin_surface ${SUBJECT}-outer_skin.surf
+# ln -s watershed/${SUBJECT}_outer_skull_surface ${SUBJECT}-outer_skull.surf
+
 # MRI (this is not really needed for anything)
 # mne_setup_mri --overwrite
 
