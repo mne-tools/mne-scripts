@@ -30,6 +30,12 @@ echo 'EEG 053' >> sample_bads.bad
 
 mne_mark_bad_channels --bad sample_bads.bad sample_audvis_raw.fif
 
+# Compute ECG SSP projection vectors.
+mne_compute_proj_ecg.py -i sample_audvis_raw.fif -c "MEG 1531" --l-freq 1 --h-freq 100 --rej-grad 3000 --rej-mag 4000 --rej-eeg 100
+
+# And for EOG
+mne_compute_proj_eog.py -i sample_audvis_raw.fif --l-freq 1 --h-freq 35 --rej-grad 3000 --rej-mag 4000 --rej-eeg 100 --proj sample_audvis_ecg_proj.fif
+
 # Filter initial raw data and save decimated raw file.
 mne_process_raw --raw sample_audvis_raw.fif --lowpass 40 \
         --save sample_audvis_filt-0-40.fif --projoff --decim 4
