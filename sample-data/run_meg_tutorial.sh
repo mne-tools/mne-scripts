@@ -20,6 +20,11 @@ echo "0.4" >> ${MNE_sample}/version.txt
 # Source space
 mne_setup_source_space --ico -6 --overwrite
 
+# Add distances to source space (if desired, takes a long time)
+BEM_DIR=$SUBJECTS_DIR/sample/bem
+mv $BEM_DIR/sample-oct-6-src.fif $BEM_DIR/sample-oct-6-orig-src.fif
+mne_add_patch_info --dist 7 --src $BEM_DIR/sample-oct-6-orig-src.fif --srcp $BEM_DIR/sample-oct-6-src.fif
+
 # Prepare for forward computation
 mne_setup_forward_model --homog --surf --ico 4
 mne_setup_forward_model --surf --ico 4
