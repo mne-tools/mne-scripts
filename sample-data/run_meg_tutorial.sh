@@ -114,6 +114,11 @@ mne_do_inverse_operator --fwd sample_audvis-meg-eeg-oct-6-fwd.fif \
 mne_do_inverse_operator --fwd sample_audvis-meg-oct-6-fwd.fif \
         --depth --meg --fixed
 
+# produce two with diagonal noise (for testing)
+mne_do_inverse_operator --fwd sample_audvis-meg-oct-6-fwd.fif --depth --loose 0.2 --meg --diagnoise --inv sample_audvis-meg-oct-6-meg-diagnoise-inv.fif
+
+mne_do_inverse_operator --fwd sample_audvis-meg-eeg-oct-6-fwd.fif --depth --loose 0.2 --eeg --meg --diagnoise --inv sample_audvis-meg-eeg-oct-6-meg-eeg-diagnoise-inv.fif
+
 # Produce stc files
 
 mods="meg eeg meg-eeg"
