@@ -137,6 +137,10 @@ mne_make_movie --inv sample_audvis-${mod}-oct-6-${mod}-inv.fif \
     --tmin 0 --tmax 250 --tstep 10 --spm \
     --smooth 5 --bmin -100 --bmax 0 --stc sample_audvis-${mod}
 
+# let's also morph to fsaverage
+mne_make_movie --stcin sample_audvis-${mod} --morph fsaverage \
+    --smooth 12 --morphgrade 3 --stc fsaverage_audvis-${mod}
+
 done
 
 ###############################################################################
