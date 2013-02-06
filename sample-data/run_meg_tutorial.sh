@@ -15,7 +15,7 @@ cd -
 export SUBJECT=sample
 
 # Store the current version of the sample data
-echo "0.4" >> ${MNE_sample}/version.txt
+echo "0.6" >> ${MNE_sample}/version.txt
 
 # Source space
 mne_setup_source_space --ico -6 --overwrite
