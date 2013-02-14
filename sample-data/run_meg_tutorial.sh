@@ -96,6 +96,25 @@ mne_sensitivity_map --fwd sample_audvis-meg-oct-6-fwd.fif --map 1 \
 mne_collect_transforms --meas ${MEG_DIR}/sample_audvis_raw.fif \
     --mri ${MEG_DIR}/sample_audvis_raw-trans.fif --out ${MEG_DIR}/all-trans.fif
 
+# Create various sensitivity maps
+mne_sensitivity_map --fwd sample_audvis-meg-eeg-oct-6-fwd.fif \
+    --map 1 --w sample_audvis-grad-oct-6-fwd-sensmap
+mne_sensitivity_map --fwd sample_audvis-meg-eeg-oct-6-fwd.fif \
+    --map 1 --w sample_audvis-mag-oct-6-fwd-sensmap --mag
+mne_sensitivity_map --fwd sample_audvis-meg-eeg-oct-6-fwd.fif \
+    --map 1 --w sample_audvis-eeg-oct-6-fwd-sensmap --eeg
+mne_sensitivity_map --fwd sample_audvis-meg-eeg-oct-6-fwd.fif \
+    --map 2 --w sample_audvis-grad-oct-6-fwd-sensmap-2
+mne_sensitivity_map --fwd sample_audvis-meg-eeg-oct-6-fwd.fif \
+    --map 3 --w sample_audvis-mag-oct-6-fwd-sensmap-3 --mag
+
+# Compute some with the EOG + ECG projectors
+for map_type in 4 5 6 7; do
+    mne_sensitivity_map --fwd sample_audvis-meg-eeg-oct-6-fwd.fif \
+        --map $map_type --w sample_audvis-eeg-oct-6-fwd-sensmap-$map_type \
+        --eeg --proj sample_audvis_eog_proj.fif
+done
+
 ###############################################################################
 # Compute MNE inverse operators
 #
