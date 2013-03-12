@@ -36,6 +36,10 @@ mne_do_forward_solution --mindist 5 \
         --meas sample_audvis_raw.fif --bem sample-5120 --megonly --overwrite \
         --fwd sample_audvis-meg-vol-7-fwd.fif
 
+# Make a sensitivity map
+mne_sensitivity_map --fwd sample_audvis-meg-vol-7-fwd.fif \
+    --map 1 --w sample_audvis-grad-vol-7-fwd-sensmap
+
 ###############################################################################
 # Compute MNE inverse operators
 #
