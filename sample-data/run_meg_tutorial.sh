@@ -15,7 +15,7 @@ cd -
 export SUBJECT=sample
 
 # Store the current version of the sample data
-echo "0.6" >> ${MNE_sample}/version.txt
+echo "0.7" >> ${MNE_sample}/version.txt
 
 # Source space
 mne_setup_source_space --ico -6 --overwrite
@@ -37,6 +37,12 @@ echo 'MEG 2443' > sample_bads.bad
 echo 'EEG 053' >> sample_bads.bad
 
 mne_mark_bad_channels --bad sample_bads.bad sample_audvis_raw.fif
+
+# Mark bad channels for empty-room noise
+
+echo 'MEG 2443' > ernoise_bads.bad
+
+mne_mark_bad_channels --bad ernoise_bads.bad ernoise_raw.fif
 
 # Compute ECG SSP projection vectors. The produced file will also include the SSP projection vectors currently in the raw file
 mne_compute_proj_ecg.py -i sample_audvis_raw.fif -c "MEG 1531" --l-freq 1 --h-freq 100 --rej-grad 3000 --rej-mag 4000 --rej-eeg 100
@@ -66,6 +72,9 @@ mne_process_raw --raw sample_audvis_raw.fif --filteroff --projon \
 mne_process_raw --raw sample_audvis_raw.fif --lowpass 40 --projon \
         --savecovtag -cov --cov audvis.cov
 
+# Compute the empty-room noise covariance matrix
+mne_process_raw --raw ernoise_raw.fif --lowpass 40 --projon \
+        --savecovtag -cov --cov ernoise.cov
 ###############################################################################
 # Compute forward solution a.k.a. lead field
 
