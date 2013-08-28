@@ -5,6 +5,13 @@ if [ $# -ne 1 ] ; then
     exit 1
 fi
 
+# XXX declare MNE_PYTHON install path in your .bashrc or befor running this script.
+if [ ! "$MNE_PYTHON" ]
+then
+	echo "The environment variable MNE_PYTHON should be set"
+	exit 1
+fi
+
 MNE_sample=$1
 export SUBJECT=sample
 
@@ -33,8 +40,17 @@ ln -s flash/outer_skull.surf .
 # mne_setup_mri --overwrite
 
 # Make high resolution head surface
-mkheadsurf -s ${SUBJECT}
-mne_surf2bem --surf ${SUBJECTS_DIR}/${SUBJECT}/surf/lh.seghead --id 4 --check --fif ${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-head.fif
+${MNE_PYTHON}/bin/mne_make_scalp_surfaces.py -s ${SUBJECT} -o
+
+head=${SUBJECT}-head.fif
+# echo $head
+if [ ! -e $head ]; then
+	printf '\ndeleting existing head surface %s\n' $head
+	rm -f $head
+fi
+
+printf '\nlinking %s as main head surface\n' % $head
+ln -s ${SUBJECT}-medium-head.fif $head
 # if the previous command fails you can use the --force option.
 
 # Generate morph maps for morphing between sample and fsaverage
