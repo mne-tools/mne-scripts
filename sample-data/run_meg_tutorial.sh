@@ -20,6 +20,11 @@ echo "0.7" >> ${MNE_sample}/version.txt
 # Source space
 mne_setup_source_space --ico -6 --overwrite
 
+# If one wanted to use other source spaces, these types of options are available
+mne_setup_source_space --subject sample --spacing 7 --overwrite
+mne_setup_source_space --subject sample --all --overwrite
+mne_setup_source_space --subject fsaverage --ico 5 --morph sample --overwrite
+
 # Add distances to source space (if desired, takes a long time)
 BEM_DIR=$SUBJECTS_DIR/sample/bem
 mv $BEM_DIR/sample-oct-6-src.fif $BEM_DIR/sample-oct-6-orig-src.fif
