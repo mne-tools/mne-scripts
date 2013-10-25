@@ -38,6 +38,27 @@ fi
 # remove fsaverage symlinks
 find ${SUBJECTS_DIR} -type l -exec rm -rf {} \;
 
+# use watershed algorithm to make BEM surfaces
+if [ ! -f ${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-inner-skull.surf ];
+then
+    cd ${SUBJECTS_DIR}/${SUBJECT}/bem
+    mne_watershed_bem
+    ln -s watershed/${SUBJECT}_inner_skull_surface ${SUBJECT}-inner_skull.surf
+    ln -s watershed/${SUBJECT}_outer_skin_surface ${SUBJECT}-outer_skin.surf
+    ln -s watershed/${SUBJECT}_outer_skull_surface ${SUBJECT}-outer_skull.surf
+fi
+
+# Make high resolution head surface
+HEAD_FNAME=${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-head.fif
+if [ ! -f ${HEAD_FNAME} ];
+then
+    mkheadsurf -s ${SUBJECT}
+    mne_surf2bem --surf ${SUBJECTS_DIR}/${SUBJECT}/surf/lh.seghead --id 4 --check --fif ${HEAD_FNAME}
+fi
+
+# Setup BEM
+mne_setup_forward_model --surf --ico 4
+
 # Convert CTF to FIF
 cd ${SPM_sample}
 mkdir -p MEG/spm
