@@ -5,14 +5,14 @@ if [ $# -ne 1 ] ; then
     exit 1
 fi
 
-MNE_sample=$1
+SPM_sample=$1
 
-cd ${MNE_sample}/subjects && export SUBJECTS_DIR=`pwd`
+cd ${SPM_sample}/subjects && export SUBJECTS_DIR=`pwd`
 cd -
-cd ${MNE_sample}/MEG/ && export MEG_DIR=`pwd`
+cd ${SPM_sample}/MEG/spm && export MEG_DIR=`pwd`
 cd -
 
-export SUBJECT=spm_smri
+export SUBJECT=spm
 
 # Source space
 mne_setup_source_space --ico -6 --overwrite

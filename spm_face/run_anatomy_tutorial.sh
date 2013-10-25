@@ -5,10 +5,10 @@ if [ $# -ne 1 ] ; then
     exit 1
 fi
 
-MNE_sample=$1
-export SUBJECT=spm_smri
+SPM_sample=$1
+export SUBJECT=spm
 
-cd ${MNE_sample}/subjects && export SUBJECTS_DIR=`pwd`
+cd ${SPM_sample}/subjects && export SUBJECTS_DIR=`pwd`
 cd -
 
 # without FLASH images use
@@ -28,5 +28,4 @@ mne_surf2bem --surf ${SUBJECTS_DIR}/${SUBJECT}/surf/lh.seghead --id 4 --check --
 
 # Generate morph maps for morphing between sample and fsaverage
 mne_make_morph_maps --from ${SUBJECT} --to fsaverage
-mne_make_morph_maps --from ${SUBJECT} --to ${SUBJECT}
-mne_make_morph_maps --from fsaverage --to fsaverage
+mne_make_morph_maps --from fsaverage --to ${SUBJECT}
