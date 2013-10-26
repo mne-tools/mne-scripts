@@ -77,4 +77,4 @@ cp ${CUR_DIR}/SPM_CTF_MEG_example_faces1_3D_raw-trans.fif ${SPM_sample}/MEG/spm/
 
 # Create archive
 cd $1
-tar -cjvf MNE-spm-face.tar.gz MNE-spm-face
+tar -cjvf MNE-spm-face.tar.bz2 MNE-spm-face
