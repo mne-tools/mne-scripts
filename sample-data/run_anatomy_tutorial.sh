@@ -46,7 +46,7 @@ if [ ! "$MNE_PYTHON" ]; then
 	mne_surf2bem --surf ${SUBJECTS_DIR}/${SUBJECT}/surf/lh.seghead --id 4 --check --fif $head
 else
 	# XXX new alternative to MATLAB based mne_make_scalp_surfaces
-	${MNE_PYTHON}/bin/mne_make_scalp_surfaces.py -s ${SUBJECT} -o
+	${MNE_PYTHON}/bin/mne make_scalp_surfaces -s ${SUBJECT} -o
 	head_medium=${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-head-medium.fif
 	printf '\nlinking %s as main head surface\n' $head_medium
 	ln -s $head_medium $head
