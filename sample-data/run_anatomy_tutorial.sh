@@ -29,29 +29,17 @@ ln -s flash/outer_skull.surf .
 # ln -s watershed/${SUBJECT}_outer_skin_surface ${SUBJECT}-outer_skin.surf
 # ln -s watershed/${SUBJECT}_outer_skull_surface ${SUBJECT}-outer_skull.surf
 
-# MRI (this is not really needed for anything)
-# mne_setup_mri --overwrite
-
 # Make high resolution head surface
 head=${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-head.fif
 if [ -e $head ]; then
-	printf '\ndeleting existing head surface %s\n' $head
+	echo deleting existing head surface ${head}
 	rm -f $head
 fi
 
-# XXX declare MNE_PYTHON install path in your .bashrc or before running this script.
-if [ ! "$MNE_PYTHON" ]; then
-	echo "\nMNE_PYTHON not set. Using fallback strategy without decimating head surfaces.\n"
-	mkheadsurf -s ${SUBJECT}
-	mne_surf2bem --surf ${SUBJECTS_DIR}/${SUBJECT}/surf/lh.seghead --id 4 --check --fif $head
-else
-	# XXX new alternative to MATLAB based mne_make_scalp_surfaces
-	${MNE_PYTHON}/bin/mne make_scalp_surfaces -s ${SUBJECT} -o
-	head_medium=${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-head-medium.fif
-	printf '\nlinking %s as main head surface\n' $head_medium
-	ln -s $head_medium $head
-fi
-# if the previous command fails you can use the --force option.
+mne make_scalp_surfaces -s ${SUBJECT} -o
+echo linking ${head_medium} as main head surface
+head_medium=${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-head-medium.fif
+ln -s $head_medium $head  # on failure use --force option.
 
 # Generate morph maps for morphing between sample and fsaverage
 mne_make_morph_maps --from ${SUBJECT} --to fsaverage
