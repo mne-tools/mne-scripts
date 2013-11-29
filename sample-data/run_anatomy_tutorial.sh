@@ -36,10 +36,10 @@ if [ -e $head ]; then
 	rm -f $head
 fi
 
-mne make_scalp_surfaces -s ${SUBJECT} -o
+mne make_scalp_surfaces -s ${SUBJECT} -o  # on failure use --force option.
 echo linking ${head_medium} as main head surface
 head_medium=${SUBJECTS_DIR}/${SUBJECT}/bem/${SUBJECT}-head-medium.fif
-ln -s $head_medium $head  # on failure use --force option.
+ln -s $head_medium $head
 
 # Generate morph maps for morphing between sample and fsaverage
 mne_make_morph_maps --from ${SUBJECT} --to fsaverage
