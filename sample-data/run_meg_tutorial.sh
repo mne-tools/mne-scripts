@@ -15,7 +15,7 @@ cd -
 export SUBJECT=sample
 
 # Store the current version of the sample data
-echo "0.7" >> ${MNE_sample}/version.txt
+echo "0.8.git" >> ${MNE_sample}/version.txt
 
 # Source space
 mne_setup_source_space --ico -6 --overwrite
@@ -52,10 +52,10 @@ echo 'MEG 2443' > ernoise_bads.bad
 mne_mark_bad_channels --bad ernoise_bads.bad ernoise_raw.fif
 
 # Compute ECG SSP projection vectors. The produced file will also include the SSP projection vectors currently in the raw file
-mne_compute_proj_ecg.py -i sample_audvis_raw.fif -c "MEG 1531" --l-freq 1 --h-freq 100 --rej-grad 3000 --rej-mag 4000 --rej-eeg 100
+mne compute_proj_ecg -i sample_audvis_raw.fif -c "MEG 1531" --l-freq 1 --h-freq 100 --rej-grad 3000 --rej-mag 4000 --rej-eeg 100
 
 # Do the same for EOG. Also include the projection vectors from the previous step, so that the file contains all projection vectors
-mne_compute_proj_eog.py -i sample_audvis_raw.fif --l-freq 1 --h-freq 35 --rej-grad 3000 --rej-mag 4000 --rej-eeg 100 --no-proj --proj sample_audvis_ecg_proj.fif
+mne compute_proj_eog -i sample_audvis_raw.fif --l-freq 1 --h-freq 35 --rej-grad 3000 --rej-mag 4000 --rej-eeg 100 --no-proj --proj sample_audvis_ecg_proj.fif
 
 # Filter initial raw data and save decimated raw file.
 mne_process_raw --raw sample_audvis_raw.fif --lowpass 40 \
