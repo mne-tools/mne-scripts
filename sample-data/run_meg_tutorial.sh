@@ -97,7 +97,7 @@ mne_do_forward_solution --mindist 5 --spacing oct-6 \
 
 # add for EEG only info on cortical points
 mne_add_patch_info --src sample_audvis-eeg-oct-6-fwd.fif \
-        --srcp sample_audvis-eeg-oct-6p-fwd.fif
+        --srcp sample_audvis-oct-6p-src.fif
 
 # for both EEG and MEG
 mne_do_forward_solution --mindist 5 --spacing oct-6 \
