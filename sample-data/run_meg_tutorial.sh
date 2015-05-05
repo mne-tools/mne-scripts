@@ -187,3 +187,17 @@ mne_dipole_fit --meas sample_audvis-ave.fif --set 1 --meg --tmin 40 --tmax 95 \
     --dip sample_audvis_set1.dip
 
 exit 0
+
+###############################################################################
+# Run the following from Python to generate shrunk covariance:
+
+#>>> raw_fname = data_path + '/MEG/sample/sample_audvis_raw.fif'
+#>>> event_fname = data_path + '/MEG/sample/sample_audvis_raw-eve.fif'
+#>>> raw = mne.io.Raw(raw_fname, preload=True)
+#>>> raw.filter(None, 40., n_jobs='cuda')
+#>>> raw.info['bads'] = ['MEG 2443']
+#>>> events = mne.read_events(event_fname)
+#>>> epochs = mne.Epochs(raw, events, None, -0.2, 0, preload=True)
+#>>> cov = mne.compute_covariance(epochs, method='shrunk')
+#>>> mne.write_cov(cov_fname, cov)
+
