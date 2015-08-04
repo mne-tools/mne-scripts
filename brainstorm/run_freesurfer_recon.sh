@@ -114,5 +114,6 @@ do
     cp -a ${TMPDIR}/sample_${ARCHIVE}/data/ ${BRAINSTORM_DATA}/bst_${ARCHIVE}/MEG
     cp -a ${BRAINSTORM_DATA}/subjects/bst_${ARCHIVE} ${BRAINSTORM_DATA}/bst_${ARCHIVE}/subjects
     mv ${BRAINSTORM_DATA}/bst_${ARCHIVE}/MEG/data ${BRAINSTORM_DATA}/bst_${ARCHIVE}/MEG/bst_${ARCHIVE}
-    tar -cjvf ${BRAINSTORM_DATA}/bst_${ARCHIVE}.tar.bz2 ${BRAINSTORM_DATA}/bst_${ARCHIVE}
+    cd ${BRAINSTORM_DATA}
+    tar -cjvf bst_${ARCHIVE}.tar.bz2 bst_${ARCHIVE}
 done
