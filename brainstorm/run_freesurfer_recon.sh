@@ -9,11 +9,11 @@ if [ $# -ne 1 ] ; then
 fi
 
 # directory for the MRI recon
-BRAINSTORM_data=$1/MNE-BRAINSTORM-data
-echo "BRAINSTORM_data set to $BRAINSTORM_data"
-if [ ! -d ${BRAINSTORM_data} ];
+BRAINSTORM_DATA=$1/MNE-brainstorm-data
+echo "BRAINSTORM_DATA set to $BRAINSTORM_DATA"
+if [ ! -d ${BRAINSTORM_DATA} ];
 then
-    mkdir -p ${BRAINSTORM_data}
+    mkdir -p ${BRAINSTORM_DATA}
 fi
 CUR_DIR=$(pwd)
 
@@ -40,7 +40,7 @@ do
 done
 
 # Create subject directory
-export SUBJECTS_DIR=${BRAINSTORM_data}/subjects
+export SUBJECTS_DIR=${BRAINSTORM_DATA}/subjects
 echo "SUBJECTS_DIR set to $SUBJECTS_DIR"
 if [ ! -d ${SUBJECTS_DIR} ];
 then
@@ -100,13 +100,13 @@ do
     fi
 
     # cleanup and archive
-    if [ ! -d ${BRAINSTORM_data}/bst_${ARCHIVE} ];
+    if [ ! -d ${BRAINSTORM_DATA}/bst_${ARCHIVE} ];
     then
-        mkdir -p ${BRAINSTORM_data}/bst_${ARCHIVE}/MEG
-        mkdir -p ${BRAINSTORM_data}/bst_${ARCHIVE}/subjects
+        mkdir -p ${BRAINSTORM_DATA}/bst_${ARCHIVE}/MEG
+        mkdir -p ${BRAINSTORM_DATA}/bst_${ARCHIVE}/subjects
     fi
-    cp -a ${TMPDIR}/sample_${ARCHIVE}/data/ ${BRAINSTORM_data}/bst_${ARCHIVE}/MEG
-    cp -a ${BRAINSTORM_data}/subjects/bst_${ARCHIVE} ${BRAINSTORM_data}/bst_${ARCHIVE}/subjects
-    mv ${BRAINSTORM_data}/bst_${ARCHIVE}/MEG/data ${BRAINSTORM_data}/bst_${ARCHIVE}/MEG/bst_${ARCHIVE}
-    tar -cjvf ${BRAINSTORM_data}/bst_${ARCHIVE}.tar.bz2 ${BRAINSTORM_data}/bst_${ARCHIVE}
+    cp -a ${TMPDIR}/sample_${ARCHIVE}/data/ ${BRAINSTORM_DATA}/bst_${ARCHIVE}/MEG
+    cp -a ${BRAINSTORM_DATA}/subjects/bst_${ARCHIVE} ${BRAINSTORM_DATA}/bst_${ARCHIVE}/subjects
+    mv ${BRAINSTORM_DATA}/bst_${ARCHIVE}/MEG/data ${BRAINSTORM_DATA}/bst_${ARCHIVE}/MEG/bst_${ARCHIVE}
+    tar -cjvf ${BRAINSTORM_DATA}/bst_${ARCHIVE}.tar.bz2 ${BRAINSTORM_DATA}/bst_${ARCHIVE}
 done
