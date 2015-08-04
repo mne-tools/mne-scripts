@@ -51,6 +51,12 @@ fi
 for ARCHIVE in auditory raw resting
 do
 
+    # make the name of the Data/data directory always lower case
+    if [ -d ${TMPDIR}/sample_${ARCHIVE}/Data ];
+    then
+        mv ${TMPDIR}/sample_${ARCHIVE}/Data ${TMPDIR}/sample_${ARCHIVE}/data
+    fi
+
     # Make the MEG directory
     # Convert CTF to FIF
     cd ${TMPDIR}/sample_${ARCHIVE}/data
