@@ -126,26 +126,12 @@ cov.avg = sample_evoked;
 %% run the LCMV beamformer
 
 % loop over the different combinations to create output for all
-save_names = {'ug_vec', 'ug_scal', 'ung'};
-weight_norms = {false, false, 'unitnoisegain'};
-pick_oris = {'no', 'yes', 'yes'};
+save_names = {'ug_vec', 'ug_scal', 'ung', 'ung_pow'};
+weight_norms = {false, false, 'unitnoisegain', 'unitnoisegain'};
+pick_oris = {'no', 'yes', 'yes', 'yes'};
+pow = {false, false, false, true};
 
 for ii=1:length(save_names)
-
-    if depth_weight{ii} == true
-        % after the fact leadfield normalization - because in Fieldtrip it is
-        % done in ft_prepare_leadfield which we do not call
-        n_dipoles = length(find(leadf.inside));
-        for jj = 1 : n_dipoles
-            leadf_tmp = leadf.leadfield{jj};
-            leadf_nrm = norm(leadf_tmp, 'fro');
-            if leadf_nrm > 0
-                leadf_tmp = leadf_tmp ./ leadf_nrm;
-            end
-            % update the original leadfield
-            leadf.leadfield{jj} = leadf_tmp;
-        end
-    end
 
     % run the beamformer
     cfg                    = [];
@@ -168,30 +154,38 @@ for ii=1:length(save_names)
     % fixedori is false) or by taking take absolut value to account for
     % arbitray 180 degrees rotations
 
-    insideidx = find(source_lcmv.inside);
-    if(size(source_lcmv.avg.mom{insideidx(1)},1)==3)
-        for jj = 1:length(insideidx)
-            % this mimicks MNE-Python's `combine_xyz`
-            source_lcmv.avg.mom{insideidx(jj)} = real(...
-                source_lcmv.avg.mom{insideidx(jj)});
-            source_lcmv.avg.mom{insideidx(jj)} = sqrt(sum(...
-                [source_lcmv.avg.mom{insideidx(jj)}(1,:).^2; ...
-                 source_lcmv.avg.mom{insideidx(jj)}(2,:).^2; ...
-                 source_lcmv.avg.mom{insideidx(jj)}(3,:).^2]));
+    if ~pow{ii}
+
+        insideidx = find(source_lcmv.inside);
+        if(size(source_lcmv.avg.mom{insideidx(1)},1)==3)
+            for jj = 1:length(insideidx)
+                % this mimicks MNE-Python's `combine_xyz`
+                source_lcmv.avg.mom{insideidx(jj)} = real(...
+                    source_lcmv.avg.mom{insideidx(jj)});
+                source_lcmv.avg.mom{insideidx(jj)} = sqrt(sum(...
+                    [source_lcmv.avg.mom{insideidx(jj)}(1,:).^2; ...
+                     source_lcmv.avg.mom{insideidx(jj)}(2,:).^2; ...
+                     source_lcmv.avg.mom{insideidx(jj)}(3,:).^2]));
+            end
+        else
+            for jj = 1:length(insideidx)
+                % take the absolute value
+                source_lcmv.avg.mom{insideidx(jj)} = abs(...
+                    source_lcmv.avg.mom{insideidx(jj)});
+            end
         end
+        % prepare MNE-Python'esque source file
+        mne_source.data = single(cat(1, source_lcmv.avg.mom{:}));
+        mne_source.tmin = min(source_lcmv.time);
+        mne_source.tstep = source_lcmv.time(2)-source_lcmv.time(1);
     else
-        for jj = 1:length(insideidx)
-            % take the absolute value
-            source_lcmv.avg.mom{insideidx(jj)} = abs(...
-                source_lcmv.avg.mom{insideidx(jj)});
-        end
+        mne_source.data = single(source_lcmv.avg.pow);
+        % prepare MNE-Python'esque source file
+        mne_source.tmin = 0.;
+        mne_source.tstep = 1.;
     end
 
-    % prepare MNE-Python'esque source file
-    mne_source.tmin = min(source_lcmv.time);
-    mne_source.tstep = source_lcmv.time(2)-source_lcmv.time(1);
     mne_source.vertices = fwd_model.src.vertno;
-    mne_source.data = single(cat(1, source_lcmv.avg.mom{:}));
 
     save_fname = ['ft_source_', save_names{ii}, '-vol.stc'];
     % save to mne structure
