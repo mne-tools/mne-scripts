@@ -10,21 +10,18 @@ The python dependencies to run this script are:
 - mne-bids>=0.3
 - nibabel>=2.4.1
 
-Notes on freesurfer
--------------------
-We *cannot* simply copy over the freesurfer files from the non-BIDS somato
-data, because we need to rename the subject to '01' instead of 'somato'. See
-the example workflow below:
+freesurfer
+----------
+Next to the python requirements, you will need freesurfer installed on your
+system. Once freesurfer is installed and you want to run this script, make sure
+to initialize freesurfer first:
 
-$ export SUBJECTS_DIR=/home/username/subjects
+$ export FREESURFER_HOME=/path/to/FreeSurfer
+$ source $FREESURFER_HOME/SetUpFreeSurfer.sh
 
-$ echo $SUBJECTS_DIR
-/home/username/subjects
+and remember to define a SUBJECTS_DIR, where freesurfer will copy the data to:
 
-$ recon-all -all -i ~/MNE-somato-data-bids/sub-01/anat/sub-01_T1w.nii.gz -s 01
-
-Then your `$SUBJECTS_DIR` should contain a folder `01` with the somato MRI data
-derivatives and you can successfully run the following cell.
+$ export SUBJECTS_DIR=/path/to/subjects
 
 Helpful links
 -------------
@@ -32,6 +29,7 @@ Helpful links
 - https://mne-tools.github.io/mne-bids/
 - https://mne-tools.github.io/stable/manual/datasets_index.html?#somatosensory
 - https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki
+- https://mne-tools.github.io/stable/auto_tutorials/source-modeling/plot_background_freesurfer.html  # noqa: E501
 
 """
 # Authors: Stefan Appelhoff <stefan.appelhoff@mailbox.org>
@@ -45,7 +43,7 @@ import warnings
 
 import numpy as np
 import mne
-from mne.utils import check_version
+from mne.utils import check_version, run_subprocess
 import mne.datasets.somato as somato
 from mne_bids import write_raw_bids, make_bids_basename, write_anat
 from mne_bids.utils import print_dir_tree
@@ -60,6 +58,13 @@ for pkg, ver in [('numpy', '1.16'), ('scipy', '1.2'), ('nibabel', '2.4.1'),
         raise RuntimeError('You need to install {0} {1} or higher:'
                            'pip install {0}>={1}'.format(pkg, ver))
 
+# Check that freesurfer is initialized
+FREESURFER_HOME = os.getenv('FREESURFER_HOME')
+SUBJECTS_DIR = os.getenv('SUBJECTS_DIR')
+if FREESURFER_HOME is None or SUBJECTS_DIR is None:
+    raise RuntimeError('You need to initialize freesurfer and define a '
+                       'SUBJECTS_DIR environment variable. Please refer to '
+                       'the module docstring for help.')
 
 # Somato data prior to conversion
 somato_path = somato.data_path()
@@ -128,8 +133,9 @@ trans = op.join(somato_path, 'MEG', 'somato', 'sef_raw_sss-trans.fif')
 
 # Copy over the MRI, convert it to NIfTI format, and write the anatomical
 # landmarks in voxel coordinates
-write_anat(somato_path_bids, subject='01', t1w=t1w, trans=trans, raw=raw,
-           overwrite=True, verbose=True)
+anat_dir = write_anat(somato_path_bids, subject='01', t1w=t1w, trans=trans,
+                      raw=raw, overwrite=True, verbose=True)
+t1w_nii = op.join(anat_dir, 'sub-01_T1w.nii.gz')
 
 # Add derivatives
 # some files cannot be specified in BIDS yet. We add these to derivatives
@@ -140,17 +146,22 @@ if not op.exists(derivatives_dir):
 
 # Make a freesurfer directory and copy over derivatives: Consider the
 # instructions in the docstring at the top of the module
-subjects_dir = op.join(derivatives_dir, 'freesurfer', 'subjects')
-if not op.exists(subjects_dir):
-    os.makedirs(subjects_dir)
+subjects_dir_bids = op.join(derivatives_dir, 'freesurfer', 'subjects')
+if not op.exists(subjects_dir_bids):
+    os.makedirs(subjects_dir_bids)
 
-local_subjects_dir = os.getenv('SUBJECTS_DIR', None)
-if local_subjects_dir is not None:
-    freesurfer_data_to_copy_over = op.join(local_subjects_dir, '01')
-    sh.copytree(freesurfer_data_to_copy_over, subjects_dir)
-else:
-    warnings.warn('\n\n**NOT** copying the freesurfer data. '
-                  'Please read the instructions in the module docstring.')
+# Run recon-all from freesurfer
+run_subprocess(['recon-all', '-i', t1w_nii, '-s', '01', '-all'])
+
+# Run make_scalp_surfaces
+run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01'])
+
+# Run watershed_bem
+run_subprocess(['recon-all', 'watershed_bem', '-s', '01'])
+
+# Finally, copy over the freesurfer results to BIDS
+freesurfer_data_to_copy_over = op.join(SUBJECTS_DIR, '01')
+sh.copytree(freesurfer_data_to_copy_over, subjects_dir_bids)
 
 # Make a directory for our subject and move the forward model there
 forward_dir = op.join(derivatives_dir, 'sub-01')
@@ -171,22 +182,28 @@ main_readme = """MNE-somato-data-bids
 This dataset contains the MNE-somato-data in BIDS format.
 
 The conversion can be reproduced through the jupyter notebook stored in the
-/code directory of this dataset. See the README in that directory.
+`/code` directory of this dataset. See the README in that directory.
 
-The /derivaties directory contains the outputs of running the freesurfer
+The `/derivaties` directory contains the outputs of running the freesurfer
 pipeline `recon-all` on the MRI data with no additional commandline options
-(only defaults were used).
+(only defaults were used): `recon-all -i $bids_nifti -s 01 -all`
 
-It also contains, the forward model *-fwd.fif, which was produced using the
-source space definition, a -trans.fif file, and the boundary element model /
-conductor model that live in freesurfer/subjects/01/bem/*-bem-sol.fif.
+After the `recon-all` call, there were further freesurfer calls from the MNE
+api:
 
-The -trans.fif file is not saved, but can be recovered from the anatomical
-landmarks in the sub-01/anat/T1w.json file and MNE-BIDS' function
+$ mne make_scalp_surfaces -s 01
+$ mne watershed_bem -s 01
+
+The derivatives also contain the forward model `*-fwd.fif`, which was produced
+using the source space definition, a `*-trans.fif` file, and the boundary
+element model (=conductor model) that lives in
+`freesurfer/subjects/01/bem/*-bem-sol.fif`.
+
+The `*-trans.fif` file is not saved, but can be recovered from the anatomical
+landmarks in the `sub-01/anat/T1w.json` file and MNE-BIDS' function
 `get_head_mri_transform`.
 
 See: https://github.com/mne-tools/mne-bids for more information.
-
 
 Note on freesurfer
 ==================
@@ -215,7 +232,7 @@ guide here: https://docs.anaconda.com/anaconda/install/
 After you have a working version of Python 3, simply install the required
 packages via `pip`:
 
-pip install numpy scipy mne==0.18 mne-bids nibabel
+pip install numpy>=1.16 scipy>=1.2 mne==0.18 mne-bids>=0.3 nibabel>=2.4.1
 
 """
 
@@ -231,5 +248,5 @@ sh.copyfile(fpath, op.join(code_dir, basename))
 
 # And show what the converted data look like
 print('\nSomato BIDS data:\n')
-print_dir_tree(somato_path_bids)
+print_dir_tree(somato_path_bids, max_depth=3)
 print('\n\n')
