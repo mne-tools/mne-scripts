@@ -55,7 +55,7 @@ if not check_version('mne', '0.18') or check_version('mne', '0.19'):
     raise RuntimeError('You need to install mne 0.18: `pip install mne==0.18`')
 # the other dependencies are a bit more lenient, we check anyways
 for pkg, ver in [('numpy', '1.16'), ('scipy', '1.2'), ('nibabel', '2.4.1'),
-                 ('mne_bids', '0.3')]:
+                 ('mne_bids', '0.2')]:  # noqa: E501 XXX: mne_bids should be changed to 0.3. Not released yet
     if not check_version(pkg, ver):
         raise RuntimeError('You need to install {0} {1} or higher:'
                            'pip install {0}>={1}'.format(pkg, ver))
