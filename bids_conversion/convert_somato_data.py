@@ -163,6 +163,10 @@ run_subprocess(['recon-all', 'watershed_bem', '-s', '01'])
 freesurfer_data_to_copy_over = op.join(SUBJECTS_DIR, '01')
 sh.copytree(freesurfer_data_to_copy_over, subjects_dir_bids)
 
+# Copy over average subject "fsaverage"
+fsaverage = op.join(FREESURFER_HOME, 'subjects', 'fsaverage')
+sh.copytree(fsaverage, op.join(subjects_dir_bids, '01'))
+
 # Make a directory for our subject and move the forward model there
 forward_dir = op.join(derivatives_dir, 'sub-01')
 if not op.exists(forward_dir):
