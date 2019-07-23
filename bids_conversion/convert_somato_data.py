@@ -62,9 +62,11 @@ for pkg, ver in [('numpy', '1.16'), ('scipy', '1.2'), ('nibabel', '2.4.1'),
 FREESURFER_HOME = os.getenv('FREESURFER_HOME')
 SUBJECTS_DIR = os.getenv('SUBJECTS_DIR')
 if FREESURFER_HOME is None or SUBJECTS_DIR is None:
-    raise RuntimeError('You need to initialize freesurfer and define a '
-                       'SUBJECTS_DIR environment variable. Please refer to '
-                       'the module docstring for help.')
+    raise RuntimeError('You need to define a FREESURFER_HOME environment '
+                       'variable pointing to your installation of freesurfer, '
+                       'and a SUBJECTS_DIR environment variable pointing to a '
+                       'folder where to save the freesurfer subject data. '
+                       'Please refer to the module docstring for help.')
 
 # Somato data prior to conversion
 somato_path = somato.data_path()
@@ -154,10 +156,10 @@ if not op.exists(subjects_dir_bids):
 run_subprocess(['recon-all', '-i', t1w_nii, '-s', '01', '-all'])
 
 # Run make_scalp_surfaces
-run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01'])
+run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01', '--overwrite'])
 
 # Run watershed_bem
-run_subprocess(['recon-all', 'watershed_bem', '-s', '01'])
+run_subprocess(['mne', 'watershed_bem', '-s', '01', '--overwrite'])
 
 # Finally, copy over the freesurfer results to BIDS
 freesurfer_data_to_copy_over = op.join(SUBJECTS_DIR, '01')
