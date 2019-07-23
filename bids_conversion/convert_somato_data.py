@@ -3,11 +3,12 @@
 Requirements
 ------------
 The python dependencies to run this script are:
-- numpy
-- scipy
+
+- numpy>=1.16
+- scipy>=1.2
 - mne<0.19
 - mne-bids>0.2
-- nibabel
+- nibabel>=2.4.1
 
 Notes on freesurfer
 -------------------
@@ -44,16 +45,30 @@ import warnings
 
 import numpy as np
 import mne
+from mne.utils import check_version
 import mne.datasets.somato as somato
 from mne_bids import write_raw_bids, make_bids_basename, write_anat
 from mne_bids.utils import print_dir_tree
+
+# mne should be 0.18 minimum ... but not higher
+if not check_version('mne', '0.18') or check_version('mne', '0.19'):
+    raise RuntimeError('You need to install mne 0.18: `pip install mne==0.18`')
+# mne-bids must be higher than 0.2
+if not check_version('mne_bids', '0.3'):
+    raise RuntimeError('You need to install mne 0.18: `pip install mne==0.18`')
+# the other dependencies are a bit more lenient, we check anyways
+for pkg, ver in [('numpy', '1.16'), ('scipy', '1.2'), ('nibabel', '2.4.1')]:
+    if not check_version(pkg, ver):
+        raise RuntimeError('You need to install {0} {1} or higher:'
+                           'pip install {0}>={1}'.format(pkg, ver))
+
 
 # Somato data prior to conversion
 somato_path = somato.data_path()
 
 # Print the directory tree
 print('\nSomato data before conversion:\n')
-print_dir_tree(somato_path, maxdepth=3)
+print_dir_tree(somato_path, max_depth=3)
 print('\n\n')
 
 # Convert to BIDS
