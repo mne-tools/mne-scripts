@@ -180,6 +180,16 @@ old_forward = op.join(somato_path, 'MEG', 'somato',
 bids_forward = op.join(forward_dir, 'sub-01_task-somato-fwd.fif')
 sh.copyfile(old_forward, bids_forward)
 
+# make a CHANGES file, marking the initial release as BIDS data
+changes_txt = """1.0.0 2019-08-01
+    - initial release
+"""
+
+changes_txt_fname = op.join(somato_path_bids, 'CHANGES')
+
+with open(changes_txt_fname, 'w') as fout:
+    print(changes_txt, file=fout)  # noqa
+
 # Create READMEs and copy over THIS script to a /code directory
 # Prepare the text for the central README
 main_readme = """MNE-somato-data-bids
