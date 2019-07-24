@@ -155,8 +155,10 @@ if not op.exists(subjects_dir_bids):
 # Run recon-all from freesurfer
 run_subprocess(['recon-all', '-i', t1w_nii, '-s', '01', '-all'])
 
-# Run make_scalp_surfaces
-run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01', '--overwrite'])
+# Run make_scalp_surfaces ... use --force to prevent an error from
+# topology defects
+run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01', '--overwrite',
+                '--force'])
 
 # Run watershed_bem
 run_subprocess(['mne', 'watershed_bem', '-s', '01', '--overwrite'])
