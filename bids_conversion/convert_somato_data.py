@@ -49,6 +49,63 @@ import mne.datasets.somato as somato
 from mne_bids import write_raw_bids, make_bids_basename, write_anat
 from mne_bids.utils import print_dir_tree
 
+# Create READMEs and copy over THIS script to a /code directory
+# Prepare the text for the central README
+main_readme = """MNE-somato-data-bids
+====================
+
+This dataset contains the MNE-somato-data in BIDS format.
+
+The conversion can be reproduced through the Python script stored in the
+`/code` directory of this dataset. See the README in that directory.
+
+The `/derivaties` directory contains the outputs of running the Freesurfer
+pipeline `recon-all` on the MRI data with no additional commandline options
+(only defaults were used): `recon-all -i $bids_nifti -s sub-01 -all`
+
+After the `recon-all` call, there were further Freesurfer calls from the MNE
+API:
+
+$ mne make_scalp_surfaces -s sub-01 --force
+$ mne watershed_bem -s sub-01
+
+The derivatives also contain the forward model `*-fwd.fif`, which was produced
+using the source space definition, a `*-trans.fif` file, and the boundary
+element model (=conductor model) that lives in
+`freesurfer/subjects/sub-01/bem/*-bem-sol.fif`.
+
+The `*-trans.fif` file is not saved, but can be recovered from the anatomical
+landmarks in the `sub-01/anat/T1w.json` file and MNE-BIDS' function
+`get_head_mri_transform`.
+
+See: https://github.com/mne-tools/mne-bids for more information.
+
+Note on freesurfer
+==================
+the freesurfer pipeline `recon-all` was run new for the sake of converting the
+somato data to BIDS format. This needed to be done to change the "somato"
+subject name to the BIDS subject label "sub-01".
+"""
+
+code_readme = """`convert_somato_data.py` is a Python script that converts the
+MNE-somato-data into BIDS format. See bids.neuroimaging.io for more
+information.
+
+For installation, we recommend the Anaconda distribution. find the installation
+guide here: https://docs.anaconda.com/anaconda/install/
+
+After you have a working version of Python 3, simply install the required
+packages via `pip`:
+
+pip install numpy>=1.16 scipy>=1.2 mne==0.18 mne-bids>=0.3 nibabel>=2.4.1
+
+"""
+
+# make a CHANGES file, marking the initial release as BIDS data
+changes_txt = """1.0.0 2019-08-01
+    - initial release
+"""
+
 # mne should be 0.18 minimum ... but not higher
 if not check_version('mne', '0.18') or check_version('mne', '0.19'):
     raise RuntimeError('You need to install mne 0.18: `pip install mne==0.18`')
@@ -161,53 +218,10 @@ old_forward = op.join(somato_path, 'MEG', 'somato',
 bids_forward = op.join(forward_dir, 'sub-01_task-somato-fwd.fif')
 sh.copyfile(old_forward, bids_forward)
 
-# make a CHANGES file, marking the initial release as BIDS data
-changes_txt = """1.0.0 2019-08-01
-    - initial release
-"""
-
 changes_txt_fname = op.join(somato_path_bids, 'CHANGES')
 
 with open(changes_txt_fname, 'w') as fout:
     print(changes_txt, file=fout)  # noqa
-
-# Create READMEs and copy over THIS script to a /code directory
-# Prepare the text for the central README
-main_readme = """MNE-somato-data-bids
-====================
-
-This dataset contains the MNE-somato-data in BIDS format.
-
-The conversion can be reproduced through the Python script stored in the
-`/code` directory of this dataset. See the README in that directory.
-
-The `/derivaties` directory contains the outputs of running the Freesurfer
-pipeline `recon-all` on the MRI data with no additional commandline options
-(only defaults were used): `recon-all -i $bids_nifti -s sub-01 -all`
-
-After the `recon-all` call, there were further Freesurfer calls from the MNE
-API:
-
-$ mne make_scalp_surfaces -s sub-01 --force
-$ mne watershed_bem -s sub-01
-
-The derivatives also contain the forward model `*-fwd.fif`, which was produced
-using the source space definition, a `*-trans.fif` file, and the boundary
-element model (=conductor model) that lives in
-`freesurfer/subjects/sub-01/bem/*-bem-sol.fif`.
-
-The `*-trans.fif` file is not saved, but can be recovered from the anatomical
-landmarks in the `sub-01/anat/T1w.json` file and MNE-BIDS' function
-`get_head_mri_transform`.
-
-See: https://github.com/mne-tools/mne-bids for more information.
-
-Note on freesurfer
-==================
-the freesurfer pipeline `recon-all` was run new for the sake of converting the
-somato data to BIDS format. This needed to be done to change the "somato"
-subject name to the BIDS subject label "sub-01".
-"""
 
 main_readme_fname = op.join(somato_path_bids, 'README')
 
@@ -218,20 +232,6 @@ with open(main_readme_fname, 'w') as fout:
 code_dir = op.join(somato_path_bids, 'code')
 if not op.exists(code_dir):
     os.makedirs(code_dir)
-
-code_readme = """`convert_somato_data.py` is a Python script that converts the
-MNE-somato-data into BIDS format. See bids.neuroimaging.io for more
-information.
-
-For installation, we recommend the Anaconda distribution. find the installation
-guide here: https://docs.anaconda.com/anaconda/install/
-
-After you have a working version of Python 3, simply install the required
-packages via `pip`:
-
-pip install numpy>=1.16 scipy>=1.2 mne==0.18 mne-bids>=0.3 nibabel>=2.4.1
-
-"""
 
 code_readme_fname = op.join(code_dir, 'README')
 
