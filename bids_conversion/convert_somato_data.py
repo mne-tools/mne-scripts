@@ -53,7 +53,7 @@ if not check_version('mne', '0.18') or check_version('mne', '0.19'):
     raise RuntimeError('You need to install mne 0.18: `pip install mne==0.18`')
 # the other dependencies are a bit more lenient, we check anyways
 for pkg, ver in [('numpy', '1.16'), ('scipy', '1.2'), ('nibabel', '2.4.1'),
-                 ('mne_bids', '0.2')]:  # noqa: E501 XXX: mne_bids should be changed to 0.3. Not released yet
+                 ('mne_bids', '0.3')]:
     if not check_version(pkg, ver):
         raise RuntimeError('You need to install {0} {1} or higher:'
                            'pip install {0}>={1}'.format(pkg, ver))
@@ -72,7 +72,7 @@ if FREESURFER_HOME is None or SUBJECTS_DIR is None:
 somato_path = somato.data_path()
 
 # Print the directory tree
-print('\nSomato data before conversion:\n')
+print('\nSomato data before conversion: {}\n'.format(somato_path))
 print_dir_tree(somato_path, max_depth=3)
 print('\n\n')
 
@@ -120,7 +120,6 @@ jsondict['License'] = 'PDDL, see: https://opendatacommons.org/licenses/pddl/'
 jsondict['ReferencesAndLinks'] = ['http://martinos.org/mne/stable/manual/datasets_index.html?#somatosensory']  # noqa: E501
 jsondict['Acknowledgements'] = "Stefan Appelhoff, Alexandre Gramfort, and Mainak Jas formatted these data to BIDS."   # noqa: E501
 
-
 # overwrite the json, updating it
 with open(dataset_description_json, 'w') as fout:
     json.dump(jsondict, fout, indent=2, sort_keys=True)
@@ -140,17 +139,10 @@ anat_dir = write_anat(somato_path_bids, subject='01', t1w=t1w, trans=trans,
 t1w_nii = op.join(anat_dir, 'sub-01_T1w.nii.gz')
 
 # Add derivatives
-# some files cannot be specified in BIDS yet. We add these to derivatives
-# General derivatives directory
+# not all of this is defined in BIDS as of yet
+# General derivatives and freesurfer directory names
 derivatives_dir = op.join(somato_path_bids, 'derivatives')
-if not op.exists(derivatives_dir):
-    os.makedirs(derivatives_dir)
-
-# Make a freesurfer directory and copy over derivatives: Consider the
-# instructions in the docstring at the top of the module
 subjects_dir_bids = op.join(derivatives_dir, 'freesurfer', 'subjects')
-if not op.exists(subjects_dir_bids):
-    os.makedirs(subjects_dir_bids)
 
 # Run recon-all from freesurfer
 run_subprocess(['recon-all', '-i', t1w_nii, '-s', '01', '-all'])
@@ -165,11 +157,17 @@ run_subprocess(['mne', 'watershed_bem', '-s', '01', '--overwrite'])
 
 # Finally, copy over the freesurfer results to BIDS
 freesurfer_data_to_copy_over = op.join(SUBJECTS_DIR, '01')
-sh.copytree(freesurfer_data_to_copy_over, subjects_dir_bids)
+dest = op.join(subjects_dir_bids, '01')
+if op.exists(dest):
+    sh.rmtree(dest)
+sh.copytree(freesurfer_data_to_copy_over, dest)
 
-# Copy over average subject "fsaverage"
+# Copy over average subject "fsaverage" to the subjects dir as well
 fsaverage = op.join(FREESURFER_HOME, 'subjects', 'fsaverage')
-sh.copytree(fsaverage, op.join(subjects_dir_bids, '01'))
+dest = op.join(subjects_dir_bids, 'fsaverage')
+if op.exists(dest):
+    sh.rmtree(dest)
+sh.copytree(fsaverage, dest)
 
 # Make a directory for our subject and move the forward model there
 forward_dir = op.join(derivatives_dir, 'sub-01')
@@ -209,7 +207,7 @@ pipeline `recon-all` on the MRI data with no additional commandline options
 After the `recon-all` call, there were further freesurfer calls from the MNE
 api:
 
-$ mne make_scalp_surfaces -s 01
+$ mne make_scalp_surfaces -s 01 --force
 $ mne watershed_bem -s 01
 
 The derivatives also contain the forward model `*-fwd.fif`, which was produced
@@ -265,6 +263,6 @@ fpath = op.realpath(__file__)
 sh.copyfile(fpath, op.join(code_dir, basename))
 
 # And show what the converted data look like
-print('\nSomato BIDS data:\n')
-print_dir_tree(somato_path_bids, max_depth=3)
+print('\nSomato BIDS data: {}\n'.format(somato_path_bids))
+print_dir_tree(somato_path_bids, max_depth=5)
 print('\n\n')
