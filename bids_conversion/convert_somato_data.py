@@ -39,12 +39,13 @@ import os
 import os.path as op
 import shutil as sh
 import json
-import warnings
 
 import numpy as np
+
 import mne
 from mne.utils import check_version, run_subprocess
 import mne.datasets.somato as somato
+
 from mne_bids import write_raw_bids, make_bids_basename, write_anat
 from mne_bids.utils import print_dir_tree
 
@@ -60,13 +61,9 @@ for pkg, ver in [('numpy', '1.16'), ('scipy', '1.2'), ('nibabel', '2.4.1'),
 
 # Check that freesurfer is initialized
 FREESURFER_HOME = os.getenv('FREESURFER_HOME')
-SUBJECTS_DIR = os.getenv('SUBJECTS_DIR')
-if FREESURFER_HOME is None or SUBJECTS_DIR is None:
+if FREESURFER_HOME is None:
     raise RuntimeError('You need to define a FREESURFER_HOME environment '
-                       'variable pointing to your installation of freesurfer, '
-                       'and a SUBJECTS_DIR environment variable pointing to a '
-                       'folder where to save the freesurfer subject data. '
-                       'Please refer to the module docstring for help.')
+                       'variable pointing to your installation of freesurfer.')
 
 # Somato data prior to conversion
 somato_path = somato.data_path()
@@ -144,30 +141,14 @@ t1w_nii = op.join(anat_dir, 'sub-01_T1w.nii.gz')
 derivatives_dir = op.join(somato_path_bids, 'derivatives')
 subjects_dir_bids = op.join(derivatives_dir, 'freesurfer', 'subjects')
 
-# Run recon-all from freesurfer
-run_subprocess(['recon-all', '-i', t1w_nii, '-s', '01', '-all'])
+os.environ['SUBJECTS_DIR'] = subjects_dir_bids
 
+run_subprocess(['recon-all', '-i', t1w_nii, '-s', 'sub-01', '-all'])
 # Run make_scalp_surfaces ... use --force to prevent an error from
 # topology defects
-run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01', '--overwrite',
+run_subprocess(['mne', 'make_scalp_surfaces', '-s', 'sub-01', '--overwrite',
                 '--force'])
-
-# Run watershed_bem
-run_subprocess(['mne', 'watershed_bem', '-s', '01', '--overwrite'])
-
-# Finally, copy over the freesurfer results to BIDS
-freesurfer_data_to_copy_over = op.join(SUBJECTS_DIR, '01')
-dest = op.join(subjects_dir_bids, '01')
-if op.exists(dest):
-    sh.rmtree(dest)
-sh.copytree(freesurfer_data_to_copy_over, dest)
-
-# Copy over average subject "fsaverage" to the subjects dir as well
-fsaverage = op.join(FREESURFER_HOME, 'subjects', 'fsaverage')
-dest = op.join(subjects_dir_bids, 'fsaverage')
-if op.exists(dest):
-    sh.rmtree(dest)
-sh.copytree(fsaverage, dest)
+run_subprocess(['mne', 'watershed_bem', '-s', 'sub-01', '--overwrite'])
 
 # Make a directory for our subject and move the forward model there
 forward_dir = op.join(derivatives_dir, 'sub-01')
@@ -197,23 +178,23 @@ main_readme = """MNE-somato-data-bids
 
 This dataset contains the MNE-somato-data in BIDS format.
 
-The conversion can be reproduced through the jupyter notebook stored in the
+The conversion can be reproduced through the Python script stored in the
 `/code` directory of this dataset. See the README in that directory.
 
-The `/derivaties` directory contains the outputs of running the freesurfer
+The `/derivaties` directory contains the outputs of running the Freesurfer
 pipeline `recon-all` on the MRI data with no additional commandline options
-(only defaults were used): `recon-all -i $bids_nifti -s 01 -all`
+(only defaults were used): `recon-all -i $bids_nifti -s sub-01 -all`
 
-After the `recon-all` call, there were further freesurfer calls from the MNE
-api:
+After the `recon-all` call, there were further Freesurfer calls from the MNE
+API:
 
-$ mne make_scalp_surfaces -s 01 --force
-$ mne watershed_bem -s 01
+$ mne make_scalp_surfaces -s sub-01 --force
+$ mne watershed_bem -s sub-01
 
 The derivatives also contain the forward model `*-fwd.fif`, which was produced
 using the source space definition, a `*-trans.fif` file, and the boundary
 element model (=conductor model) that lives in
-`freesurfer/subjects/01/bem/*-bem-sol.fif`.
+`freesurfer/subjects/sub-01/bem/*-bem-sol.fif`.
 
 The `*-trans.fif` file is not saved, but can be recovered from the anatomical
 landmarks in the `sub-01/anat/T1w.json` file and MNE-BIDS' function
@@ -225,7 +206,7 @@ Note on freesurfer
 ==================
 the freesurfer pipeline `recon-all` was run new for the sake of converting the
 somato data to BIDS format. This needed to be done to change the "somato"
-subject name to the BIDS subject label "01".
+subject name to the BIDS subject label "sub-01".
 """
 
 main_readme_fname = op.join(somato_path_bids, 'README')
