@@ -56,11 +56,11 @@ This dataset contains the MNE-somato-data in BIDS format.
 The conversion can be reproduced through the Python script stored in the
 `/code` directory of this dataset. See the README in that directory.
 
-The `/derivaties` directory contains the outputs of running the FreeSurfer
+The `/derivatives` directory contains the outputs of running the FreeSurfer
 pipeline `recon-all` on the MRI data with no additional commandline options
 (only defaults were used):
 
-$ recon-all -i $bids_nifti -s sub-01 -all
+$ recon-all -i sub-01_T1w.nii.gz -s sub-01 -all
 
 After the `recon-all` call, there were further FreeSurfer calls from the MNE
 API:
