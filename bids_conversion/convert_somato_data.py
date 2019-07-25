@@ -242,7 +242,7 @@ code_fname = op.join(code_dir, 'README')
 for fname, txt in zip((changes_fname, main_fname, code_fname),
                       (changes_readme, main_readme, code_readme)):
     with open(fname, 'w') as fout:
-        print(changes_txt, file=fout)  # noqa: E999
+        print(txt, file=fout)  # noqa: E999
 
 # Finally, copy over THIS Python script as well
 basename = op.basename(__file__)
