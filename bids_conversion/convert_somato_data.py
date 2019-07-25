@@ -2,7 +2,7 @@
 
 Requirements
 ------------
-The python dependencies to run this script are:
+The Python dependencies to run this script are:
 
 - numpy>=1.16
 - scipy>=1.2
@@ -10,18 +10,14 @@ The python dependencies to run this script are:
 - mne-bids>=0.3
 - nibabel>=2.4.1
 
-freesurfer
+FreeSurfer
 ----------
-Next to the python requirements, you will need freesurfer installed on your
-system. Once freesurfer is installed and you want to run this script, make sure
-to initialize freesurfer first:
+Next to the Python requirements, you will need FreeSurfer installed on your
+system. Once FreeSurfer is installed and you want to run this script, make sure
+to initialize FreeSurfer first:
 
 $ export FREESURFER_HOME=/path/to/FreeSurfer
 $ source $FREESURFER_HOME/SetUpFreeSurfer.sh
-
-and remember to define a SUBJECTS_DIR, where freesurfer will copy the data to:
-
-$ export SUBJECTS_DIR=/path/to/subjects
 
 Helpful links
 -------------
@@ -33,6 +29,7 @@ Helpful links
 
 """
 # Authors: Stefan Appelhoff <stefan.appelhoff@mailbox.org>
+#          Mainak Jas <mainakjas@gmail.com>
 #
 # License: BSD (3-clause)
 import os
@@ -49,7 +46,7 @@ import mne.datasets.somato as somato
 from mne_bids import write_raw_bids, make_bids_basename, write_anat
 from mne_bids.utils import print_dir_tree
 
-# Create READMEs and copy over THIS script to a /code directory
+# Create READMEs for the BIDS dataset
 # Prepare the text for the central README
 main_readme = """MNE-somato-data-bids
 ====================
@@ -59,11 +56,13 @@ This dataset contains the MNE-somato-data in BIDS format.
 The conversion can be reproduced through the Python script stored in the
 `/code` directory of this dataset. See the README in that directory.
 
-The `/derivaties` directory contains the outputs of running the Freesurfer
+The `/derivaties` directory contains the outputs of running the FreeSurfer
 pipeline `recon-all` on the MRI data with no additional commandline options
-(only defaults were used): `recon-all -i $bids_nifti -s sub-01 -all`
+(only defaults were used):
 
-After the `recon-all` call, there were further Freesurfer calls from the MNE
+$ recon-all -i $bids_nifti -s sub-01 -all
+
+After the `recon-all` call, there were further FreeSurfer calls from the MNE
 API:
 
 $ mne make_scalp_surfaces -s sub-01 --force
@@ -80,15 +79,19 @@ landmarks in the `sub-01/anat/T1w.json` file and MNE-BIDS' function
 
 See: https://github.com/mne-tools/mne-bids for more information.
 
-Note on freesurfer
-==================
-the freesurfer pipeline `recon-all` was run new for the sake of converting the
+Notes on FreeSurfer
+===================
+the FreeSurfer pipeline `recon-all` was run new for the sake of converting the
 somato data to BIDS format. This needed to be done to change the "somato"
-subject name to the BIDS subject label "sub-01".
+subject name to the BIDS subject label "01". Note, that this is NOT "sub-01",
+because in BIDS, the "sub-" is just a prefix, whereas the "01" is the subject
+label.
+
 """
 
+# Prepare the text for the README in the /code directory
 code_readme = """`convert_somato_data.py` is a Python script that converts the
-MNE-somato-data into BIDS format. See bids.neuroimaging.io for more
+MNE-somato-data into BIDS format. See https://bids.neuroimaging.io for more
 information.
 
 For installation, we recommend the Anaconda distribution. find the installation
@@ -102,8 +105,9 @@ pip install numpy>=1.16 scipy>=1.2 mne==0.18 mne-bids>=0.3 nibabel>=2.4.1
 """
 
 # make a CHANGES file, marking the initial release as BIDS data
-changes_txt = """1.0.0 2019-08-01
+changes_readme = """1.0.0 2019-08-01
     - initial release
+
 """
 
 # mne should be 0.18 minimum ... but not higher
@@ -116,11 +120,13 @@ for pkg, ver in [('numpy', '1.16'), ('scipy', '1.2'), ('nibabel', '2.4.1'),
         raise RuntimeError('You need to install {0} {1} or higher:'
                            'pip install {0}>={1}'.format(pkg, ver))
 
-# Check that freesurfer is initialized
+# Check that FreeSurfer is initialized
 FREESURFER_HOME = os.getenv('FREESURFER_HOME')
 if FREESURFER_HOME is None:
     raise RuntimeError('You need to define a FREESURFER_HOME environment '
-                       'variable pointing to your installation of freesurfer.')
+                       'variable pointing to your installation of FreeSurfer.'
+                       'Also make sure you have initialized FreeSurfer by '
+                       'running: `source $FREESURFER_HOME/SetUpFreeSurfer.sh`')
 
 # Somato data prior to conversion
 somato_path = somato.data_path()
@@ -179,7 +185,7 @@ with open(dataset_description_json, 'w') as fout:
     json.dump(jsondict, fout, indent=2, sort_keys=True)
 
 # Write anatomical data to BIDS
-# we take the original T1 from the freesurfer directory
+# we take the original T1 from the FreeSurfer directory
 t1w = op.join(somato_path, 'subjects', 'somato', 'mri', 'T1.mgz')
 
 # we also take the trans file, and use it to write the coordinates of
@@ -194,21 +200,27 @@ t1w_nii = op.join(anat_dir, 'sub-01_T1w.nii.gz')
 
 # Add derivatives
 # not all of this is defined in BIDS as of yet
-# General derivatives and freesurfer directory names
+# General derivatives and FreeSurfer directory names
 derivatives_dir = op.join(somato_path_bids, 'derivatives')
 subjects_dir_bids = op.join(derivatives_dir, 'freesurfer', 'subjects')
 
+# Export the FreeSurfer SUBJECTS_DIR as environment variable, available to
+# this process and all subprocesses
 os.environ['SUBJECTS_DIR'] = subjects_dir_bids
 
-run_subprocess(['recon-all', '-i', t1w_nii, '-s', 'sub-01', '-all'])
+# Run recon-all from FreeSurfer
+run_subprocess(['recon-all', '-i', t1w_nii, '-s', '01', '-all'])
+
 # Run make_scalp_surfaces ... use --force to prevent an error from
 # topology defects
-run_subprocess(['mne', 'make_scalp_surfaces', '-s', 'sub-01', '--overwrite',
+run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01', '--overwrite',
                 '--force'])
-run_subprocess(['mne', 'watershed_bem', '-s', 'sub-01', '--overwrite'])
+
+# Run watershed_bem
+run_subprocess(['mne', 'watershed_bem', '-s', '01', '--overwrite'])
 
 # Make a directory for our subject and move the forward model there
-forward_dir = op.join(derivatives_dir, 'sub-01')
+forward_dir = op.join(derivatives_dir, '01')
 if not op.exists(forward_dir):
     os.makedirs(forward_dir)
 
@@ -218,27 +230,21 @@ old_forward = op.join(somato_path, 'MEG', 'somato',
 bids_forward = op.join(forward_dir, 'sub-01_task-somato-fwd.fif')
 sh.copyfile(old_forward, bids_forward)
 
-changes_txt_fname = op.join(somato_path_bids, 'CHANGES')
-
-with open(changes_txt_fname, 'w') as fout:
-    print(changes_txt, file=fout)  # noqa
-
-main_readme_fname = op.join(somato_path_bids, 'README')
-
-with open(main_readme_fname, 'w') as fout:
-    print(main_readme, file=fout)  # noqa
-
-# Prepare a /code directory and write a README
+# Prepare a /code directory to put a README there
 code_dir = op.join(somato_path_bids, 'code')
 if not op.exists(code_dir):
     os.makedirs(code_dir)
 
-code_readme_fname = op.join(code_dir, 'README')
+# Write the README and CHANGES texts defined earlier
+changes_fname = op.join(somato_path_bids, 'CHANGES')
+main_fname = op.join(somato_path_bids, 'README')
+code_fname = op.join(code_dir, 'README')
+for fname, txt in zip((changes_fname, main_fname, code_fname),
+                      (changes_readme, main_readme, code_readme)):
+    with open(fname, 'w') as fout:
+        print(changes_txt, file=fout)  # noqa: E999
 
-with open(code_readme_fname, 'w') as fout:
-    print(code_readme, file=fout)
-
-# Finally, copy over THIS script as well
+# Finally, copy over THIS Python script as well
 basename = op.basename(__file__)
 fpath = op.realpath(__file__)
 sh.copyfile(fpath, op.join(code_dir, basename))
