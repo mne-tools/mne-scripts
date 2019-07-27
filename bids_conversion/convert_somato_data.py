@@ -60,18 +60,18 @@ The `/derivatives` directory contains the outputs of running the FreeSurfer
 pipeline `recon-all` on the MRI data with no additional commandline options
 (only defaults were used):
 
-$ recon-all -i sub-01_T1w.nii.gz -s sub-01 -all
+$ recon-all -i sub-01_T1w.nii.gz -s 01 -all
 
 After the `recon-all` call, there were further FreeSurfer calls from the MNE
 API:
 
-$ mne make_scalp_surfaces -s sub-01 --force
-$ mne watershed_bem -s sub-01
+$ mne make_scalp_surfaces -s 01 --force
+$ mne watershed_bem -s 01
 
 The derivatives also contain the forward model `*-fwd.fif`, which was produced
 using the source space definition, a `*-trans.fif` file, and the boundary
 element model (=conductor model) that lives in
-`freesurfer/subjects/sub-01/bem/*-bem-sol.fif`.
+`freesurfer/subjects/01/bem/*-bem-sol.fif`.
 
 The `*-trans.fif` file is not saved, but can be recovered from the anatomical
 landmarks in the `sub-01/anat/T1w.json` file and MNE-BIDS' function
