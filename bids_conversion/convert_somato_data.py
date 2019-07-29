@@ -220,14 +220,14 @@ run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01', '--overwrite',
 run_subprocess(['mne', 'watershed_bem', '-s', '01', '--overwrite'])
 
 # Make a directory for our subject and move the forward model there
-forward_dir = op.join(derivatives_dir, '01')
-if not op.exists(forward_dir):
-    os.makedirs(forward_dir)
+sub_deri_dir = op.join(derivatives_dir, 'sub-01')
+if not op.exists(sub_deri_dir):
+    os.makedirs(sub_deri_dir)
 
 # copy it, overwriting old if it's there
 old_forward = op.join(somato_path, 'MEG', 'somato',
                       'somato-meg-oct-6-fwd.fif')
-bids_forward = op.join(forward_dir, 'sub-01_task-somato-fwd.fif')
+bids_forward = op.join(sub_deri_dir, 'sub-01_task-somato-fwd.fif')
 sh.copyfile(old_forward, bids_forward)
 
 # Prepare a /code directory to put a README there
