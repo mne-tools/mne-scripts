@@ -18,6 +18,8 @@ mne_volume_source_space --bem $SUBJECTS_DIR/$SUBJECT/bem/sample-5120-bem.fif \
     --grid 7 --mri $SUBJECTS_DIR/$SUBJECT/mri/T1.mgz \
     --src $SUBJECTS_DIR/$SUBJECT/bem/volume-7mm-src.fif
 
+# XXX load src in Python, set src[0]['subject_his_id'], overwrite
+
 # Prepare for forward computation
 mne_setup_forward_model --homog --surf \
         --src $SUBJECTS_DIR/$SUBJECT/bem/volume-7mm-src.fif
