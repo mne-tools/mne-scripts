@@ -177,7 +177,7 @@ with open(dataset_description_json, 'r') as fin:
 jsondict['Name'] = 'MNE-somato-data-bids'
 jsondict['Authors'] = ['Lauri Parkkonen']
 jsondict['License'] = 'PDDL, see: https://opendatacommons.org/licenses/pddl/'
-jsondict['ReferencesAndLinks'] = ['http://martinos.org/mne/stable/manual/datasets_index.html?#somatosensory']  # noqa: E501
+jsondict['ReferencesAndLinks'] = ['https://mne.tools/stable/overview/datasets_index.html#somatosensory']  # noqa: E501
 jsondict['Acknowledgements'] = "Stefan Appelhoff, Alexandre Gramfort, and Mainak Jas formatted these data to BIDS."   # noqa: E501
 
 # overwrite the json, updating it
