@@ -10,15 +10,16 @@
 % Input data for this file can be produced using the _get_bf_data function from
 % beamformer.test.test_external
 
-
 % path to MNE testing data and MNE sample dataset:
-mne_data_path = './';
-mne_sample_path = './';
+mne_data_path = './';  % path to Sample headmodels etc.
+mne_sample_path = './';  % path to the Sample data set
+
 % path to save and load data:
-data_path = './';
+data_path = './';  % path to output from _get_bf_data(), see docstring
+save_path = './';  % path for saving the test files
 
 % add FieldTrip and NutMEG
-fieldtrip_path = './';
+fieldtrip_path = './';  % path to FieldTrip
 nutmeg_path = './';
 
 try
@@ -183,5 +184,5 @@ for ii=1:length(save_names)
 
     save_fname = ['ft_source_', save_names{ii}, '-vol.stc'];
     % save to mne structure
-    mne_write_stc_file(fullfile(data_path, save_fname), mne_source);
+    mne_write_stc_file(fullfile(save_path, save_fname), mne_source);
 end
