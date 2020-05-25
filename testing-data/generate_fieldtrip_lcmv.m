@@ -167,12 +167,6 @@ for ii=1:length(save_names)
                      source_lcmv.avg.mom{insideidx(jj)}(2,:).^2; ...
                      source_lcmv.avg.mom{insideidx(jj)}(3,:).^2]));
             end
-        else
-            for jj = 1:length(insideidx)
-                % take the absolute value
-                source_lcmv.avg.mom{insideidx(jj)} = abs(...
-                    source_lcmv.avg.mom{insideidx(jj)});
-            end
         end
         % prepare MNE-Python'esque source file
         mne_source.data = single(cat(1, source_lcmv.avg.mom{:}));
