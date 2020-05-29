@@ -127,10 +127,10 @@ cov.avg = sample_evoked;
 %% run the LCMV beamformer
 
 % loop over the different combinations to create output for all
-save_names = {'ug_vec', 'ug_scal', 'ung', 'ung_pow'};
-weight_norms = {false, false, 'unitnoisegain', 'unitnoisegain'};
-pick_oris = {'no', 'yes', 'yes', 'yes'};
-pow = {false, false, false, true};
+save_names = {'ug_vec', 'ug_scal', 'ung', 'ung_pow', 'ung_vec'};
+weight_norms = {false, false, 'unitnoisegain', 'unitnoisegain', 'unitnoisegain'};
+pick_oris = {'no', 'yes', 'yes', 'yes', 'no'};
+pow = {false, false, false, true, false};
 
 for ii=1:length(save_names)
 
@@ -156,33 +156,13 @@ for ii=1:length(save_names)
     % arbitray 180 degrees rotations
 
     if ~pow{ii}
-
         insideidx = find(source_lcmv.inside);
-        if(size(source_lcmv.avg.mom{insideidx(1)},1)==3)
-            for jj = 1:length(insideidx)
-                % this mimicks MNE-Python's `combine_xyz`
-                source_lcmv.avg.mom{insideidx(jj)} = real(...
-                    source_lcmv.avg.mom{insideidx(jj)});
-                source_lcmv.avg.mom{insideidx(jj)} = sqrt(sum(...
-                    [source_lcmv.avg.mom{insideidx(jj)}(1,:).^2; ...
-                     source_lcmv.avg.mom{insideidx(jj)}(2,:).^2; ...
-                     source_lcmv.avg.mom{insideidx(jj)}(3,:).^2]));
-            end
-        end
         % prepare MNE-Python'esque source file
-        mne_source.data = single(cat(1, source_lcmv.avg.mom{:}));
-        mne_source.tmin = min(source_lcmv.time);
-        mne_source.tstep = source_lcmv.time(2)-source_lcmv.time(1);
+        stc = permute(single(cat(3, source_lcmv.avg.mom{:})), [3, 1, 2]);
     else
-        mne_source.data = single(source_lcmv.avg.pow);
-        % prepare MNE-Python'esque source file
-        mne_source.tmin = 0.;
-        mne_source.tstep = 1.;
+        stc = single(source_lcmv.avg.pow);
     end
-
-    mne_source.vertices = fwd_model.src.vertno;
-
-    save_fname = ['ft_source_', save_names{ii}, '-vol.stc'];
+    save_fname = ['ft_source_', save_names{ii}, '-vol.mat'];
     % save to mne structure
-    mne_write_stc_file(fullfile(save_path, save_fname), mne_source);
+    save(save_fname, 'stc');
 end
