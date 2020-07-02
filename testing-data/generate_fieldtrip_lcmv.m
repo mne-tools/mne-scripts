@@ -23,8 +23,8 @@ fieldtrip_path = './';  % path to FieldTrip
 nutmeg_path = './';
 
 try
-    warning('FieldTrip is already on your path, check for right version.')
     ft_defaults;
+    warning('FieldTrip is already on your path, check for right version.')
 catch
     addpath(fieldtrip_path);
     ft_defaults;
@@ -139,8 +139,8 @@ for ii=1:length(save_names)
     cfg.channel            = data.label;
     cfg.headmodel          = ft_convert_units(vol, 'mm');
     cfg.method             = 'lcmv';
-    cfg.grid               = ft_convert_units(leadf, 'mm');
-    cfg.lcmv.reducerank    = 'no' ;
+    cfg.sourcemodel        = ft_convert_units(leadf, 'mm');
+    cfg.reducerank         = 'no' ;
     cfg.lcmv.fixedori      = pick_oris{ii};
     if weight_norms{ii} == 'unitnoisegain'
         cfg.lcmv.projectnoise  = 'yes';
