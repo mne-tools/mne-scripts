@@ -23,8 +23,8 @@ fieldtrip_path = './';  % path to FieldTrip
 nutmeg_path = './';
 
 try
-    warning('FieldTrip is already on your path, check for right version.')
     ft_defaults;
+    warning('FieldTrip is already on your path, check for right version.')
 catch
     addpath(fieldtrip_path);
     ft_defaults;
