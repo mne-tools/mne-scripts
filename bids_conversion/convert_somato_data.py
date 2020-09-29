@@ -219,6 +219,14 @@ run_subprocess(['mne', 'make_scalp_surfaces', '-s', '01', '--overwrite',
 # Run watershed_bem
 run_subprocess(['mne', 'watershed_bem', '-s', '01', '--overwrite'])
 
+# Make BEM
+model = mne.make_bem_model('01', conductivity=(0.3,), verbose=True)
+mne.write_bem_surfaces(
+    op.join(subjects_dir_bids, '01', 'bem', '01-5120-bem.fif'), model)
+bem = mne.make_bem_solution(model, verbose=True)
+mne.write_bem_solution(
+    op.join(subjects_dir_bids, '01', 'bem', '01-5120-bem-sol.fif'), bem)
+
 # Make a directory for our subject and move the forward model there
 # NOTE: We need to adjust the subject id
 sub_deri_dir = op.join(derivatives_dir, 'sub-01')
